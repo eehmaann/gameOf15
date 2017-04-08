@@ -6,7 +6,7 @@
  *  the board, and then the objective is to return the board to the original pattern.
  *
  *  @author   Eric Ehmann
- *  @version  1.0   Last modified 4/11/16
+ *  @version  1.0   Last modified 4/7/17
  */
 import java.awt.*;
 import java.awt.event.*;
@@ -14,75 +14,92 @@ import javax.swing.*;
 import java.util.*;
 
 
-public class FifteenPuzzle extends JFrame implements ActionListener{
-	private static final int HEIGHT=350;
-	private static final int WIDTH= 300;
-	private static final int SIZE=4;
+public class FifteenPuzzle extends JFrame implements ActionListener {
+    private static final int HEIGHT=350;
+    private static final int WIDTH= 300;
+    private static final int SIZE=4;
     private JButton[][] tile = new JButton[4][4];
-    private JButton shuffle;
-    private JButton quit;
-    private String [] answer = new String [16];
-    
+    private JButton shuffleButton;
+    private JButton quitButton;
+    private JPanel  pieces = new JPanel ();
+    private JPanel commands = new JPanel();
+    private String [] answerArray = new String [16];
+
 	/**
 		*  This is the construction method.  It will create the puzzle
 		*
 		*/  
-    public FifteenPuzzle()
-	{
-		setTitle("Puzzle");
-		setSize (HEIGHT, WIDTH);
-		setLocation (200,200);
-		setDefaultCloseOperation ( EXIT_ON_CLOSE); 
+    public FifteenPuzzle() {
+        setTitle("Puzzle");
+        setSize (HEIGHT, WIDTH);
+        setLocation (200,200);
+        setDefaultCloseOperation ( EXIT_ON_CLOSE); 
 	
-		JPanel  pieces = new JPanel ();
-      	pieces.setLayout (new GridLayout (SIZE, SIZE, 3, 3) );
+        
+        pieces.setLayout (new GridLayout (SIZE, SIZE, 3, 3) );
       	
+        labelTiles();
+        formatTiles( pieces);
+        setAnswers();
+        
+        formatCommandsPanel(commands);
+      	
+        JPanel board = new JPanel();
+        formatBoardPanel(board, commands);
+	}
 
+    public void labelTiles() {
         int idx = 0;
-        for(int i=0; i<4; i++){
-            for(int j=0; j<4; j++){
-                if( idx < 15){
-                	tile[i][j] = new JButton( ""+(idx+1));
-                	tile[i][j].setFont (new Font ("Times", Font.BOLD, 24));
-                	tile[i][j].setHorizontalAlignment(JButton.CENTER);
-                    tile[i][j].setPreferredSize(new Dimension(100,100));
-                }
-                else{
-                    tile[i][j] = new JButton("");
-                }
-                pieces.add(tile[i][j]);
-    			tile[i][j].addActionListener ( FifteenPuzzle.this );
+        // number the tiles
+        for(int i=0; i<4; i++) {
+            for(int j=0; j<4; j++) {
+                tile[i][j] = new JButton( ""+(idx+1));
                 idx++;
             }
         }
-        for (int i=0; i<=15; i++){
-        	if (i<15)
-        	{ 
-        		answer[i]= ""+(i+1); 
-        	}
-        	else{
-        		answer[i]="";
-        	}
-        }
+        // leave one tile blank
+        tile[3][3].setText("");
+                
+    }
+    public void formatTiles(JPanel pieces) {
+        for (JButton [] row : tile)
+            for(JButton i :row) {
+                i.setFont (new Font ("Times", Font.BOLD, 24));
+                i.setHorizontalAlignment(JButton.CENTER);
+                i.setPreferredSize(new Dimension(100,100));
+                pieces.add(i);
+                i.addActionListener ( FifteenPuzzle.this );
+            }
+    }
+
+    public void setAnswers() {
+
+        for (int i=0; i<15; i++) { 
+            answerArray[i]= ""+(i+1);
+        } 
+        answerArray[15]="";
+    }
+
+    public void formatCommandsPanel(JPanel commands) {
         
-        JPanel commands = new JPanel(); 
-      	shuffle = new JButton ("Shuffle");
-      	shuffle.addActionListener (FifteenPuzzle.this);
-      	quit = new JButton ("Quit");
-      	quit.addActionListener(FifteenPuzzle.this);
-      	commands.setLayout (new GridLayout (0,2));
-      	commands.add(shuffle);
-      	commands.add(quit);
-      	
-        JPanel board = new JPanel();
-		board.setLayout (new BorderLayout());
-		getContentPane().add( pieces);
-		board.add(pieces, BorderLayout.CENTER);
-		getContentPane().add( commands);
-		board.add(commands, BorderLayout.SOUTH);
-		getContentPane().add( board );
-		setVisible(true);
-	}
+        shuffleButton = new JButton ("Shuffle");
+        shuffleButton.addActionListener (FifteenPuzzle.this);
+        quitButton = new JButton ("Quit");
+        quitButton.addActionListener(FifteenPuzzle.this);
+        commands.setLayout (new GridLayout (0,2));
+        commands.add(shuffleButton);
+        commands.add(quitButton);
+    }
+
+    public void formatBoardPanel(JPanel board, JPanel commands) {
+        board.setLayout (new BorderLayout());
+        getContentPane().add( pieces);
+        board.add(pieces, BorderLayout.CENTER);
+        getContentPane().add( commands);
+        board.add(commands, BorderLayout.SOUTH);
+        getContentPane().add( board );
+        setVisible(true);
+    }
 	/**
 		* This method will control what happens if a button is pressed.
 		*
@@ -97,10 +114,10 @@ public class FifteenPuzzle extends JFrame implements ActionListener{
          		}        	
         	}
         }
-        if (e.getSource()==quit){
+        if (e.getSource()==quitButton) {
         	System.exit(0);        	
         }
-        if (e.getSource()==shuffle){
+        if (e.getSource()==shuffleButton) {
         	shuffle();
         }
         
@@ -117,30 +134,33 @@ public class FifteenPuzzle extends JFrame implements ActionListener{
     	*/
     public void doMove(int i, int j)
     {
-    	if(i>0){
+    	if(i>0) {
          //Test North
-                if(tile[i-1][j].getText().equals("")){
-                      swapTiles(i,j, i-1,j);
-                }
-         }
-         if(i<3){
+            if(tile[i-1][j].getText().equals("")){
+                swapTiles(i,j, i-1,j);
+            }
+        }
+        
+        if(i<3) {
              //Test South
-              if(tile[i+1][j].getText().equals("")){
-            	  swapTiles(i,j, i+1,j);
+            if(tile[i+1][j].getText().equals("")){
+            	swapTiles(i,j, i+1,j);
                             
-                  }
-         }
-         if(j>0){
+            }
+        }
+        
+        if(j>0){
             //Test West
-             if(tile[i][j-1].getText().equals("")){
-                    swapTiles(i,j, i,j-1);
-                 }
+            if(tile[i][j-1].getText().equals("")){
+                swapTiles(i,j, i,j-1);
+            }
          }
-         if(j<3){
-               //Test East
-                 if(tile[i][j+1].getText().equals("")){
-                       swapTiles(i,j, i,j+1);
-                  }
+
+        if(j<3){
+            //Test East
+            if(tile[i][j+1].getText().equals("")){
+                swapTiles(i,j, i,j+1);
+            }
          }
            repaint();
 
@@ -160,27 +180,27 @@ public class FifteenPuzzle extends JFrame implements ActionListener{
     	*@param		secondCol	the column of the blank tile
     	*/ 
      private void swapTiles(int firstRow, int firstCol, int secondRow, int secondCol){
-         tile[secondRow][secondCol].setText(tile[firstRow][firstCol].getText());
-         tile[firstRow][firstCol].setText("");
+        tile[secondRow][secondCol].setText(tile[firstRow][firstCol].getText());
+        tile[firstRow][firstCol].setText("");
      }
      /**
      	* This method will check whether the puzzle has been solved.
      	* 
      	*@return 	boolean	true if the puzzle has been solved.
      	*/
-     private boolean isSolved(){
-         int arrayPlace = 0;
-         for(int i=0; i<4; i++){
-             for(int j=0; j<4; j++){
-                     String text = tile[i][j].getText();
-                     if (! text.equals(answer[arrayPlace]) ){
-                        return false;
-                         }
-                         arrayPlace++;
-                     }
-                 }
-             return true;
-         	}      
+    private boolean isSolved(){
+        int arrayPlace = 0;
+        for(int i=0; i<4; i++){
+            for(int j=0; j<4; j++){
+                String text = tile[i][j].getText();
+                if (! text.equals(answerArray[arrayPlace]) ){
+                    return false;
+                }
+                arrayPlace++;
+            }
+        }
+        return true;
+    }      
     /** 
     	* This method calls for the shuffling to be done and will keep count of the times
     	* the shuffle has happened.  It will find the location of the blank tile
@@ -190,11 +210,11 @@ public class FifteenPuzzle extends JFrame implements ActionListener{
      private void shuffle(){
      	for(int turns=0; turns<500; turns++){
      		for(int i=0; i<4; i++){
-                 for(int j=0; j<4; j++){
+                for(int j=0; j<4; j++){
                  	if (tile[i][j].getText().equals("")){
                  		blankChange(i, j);                 		
                  	}
-                 }
+                }
      		}
      		repaint();
      	}
@@ -218,10 +238,13 @@ public class FifteenPuzzle extends JFrame implements ActionListener{
 				if (direction==1){
 					swapTiles(i+1, j, i, j);
 				}
+                else{
+                    swapTiles(i-1, j, i, j);
+                }
 			}
 			else{
-					swapTiles(i-1, j, i, j);
-				}
+                    swapTiles(i-1, j, i, j);
+                }
 			}
 		else //path==1 movement based on j thus horizontal
 		{ 
@@ -238,6 +261,7 @@ public class FifteenPuzzle extends JFrame implements ActionListener{
 					swapTiles(i, j-1, i, j);
 				}
 			}
+
 			else{
 					swapTiles(i, j-1, i, j);
 				}
