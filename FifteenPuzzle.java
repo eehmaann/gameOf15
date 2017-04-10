@@ -46,6 +46,7 @@ public class FifteenPuzzle extends JFrame implements ActionListener {
       	
         JPanel board = new JPanel();
         formatBoardPanel(board, commands);
+        shuffle();
 	}
 
     public void labelTiles() {
@@ -105,11 +106,10 @@ public class FifteenPuzzle extends JFrame implements ActionListener {
 		*
 		*	@param e  the button that was pressed
 		*/
-    public void actionPerformed( ActionEvent e )
-    {
-    	for (int i=0; i<4; i++){
-    		for (int j=0; j<4; j++){ 
-         		if (e.getSource()== tile[i][j]){ 
+    public void actionPerformed( ActionEvent e ) {
+    	for (int i=0; i<4; i++) {
+    		for (int j=0; j<4; j++) { 
+         		if (e.getSource()== tile[i][j]) { 
          			doMove(i,j);
          		}        	
         	}
@@ -119,9 +119,7 @@ public class FifteenPuzzle extends JFrame implements ActionListener {
         }
         if (e.getSource()==shuffleButton) {
         	shuffle();
-        }
-        
-         	
+        }         	
     }
     	
     /**
@@ -129,42 +127,42 @@ public class FifteenPuzzle extends JFrame implements ActionListener {
     	*   it is a legal move.  If it is then it will switch the tiles, and call 
     	*	a method to check for a winning condition
     	*
-    	* @param int i		the row of the piece being checked
-    	* @param int j		the column of the piece being checked
+    	* @param int row		the row of the piece being checked
+    	* @param int column		the column of the piece being checked
     	*/
-    public void doMove(int i, int j)
+    public void doMove(int row, int column)
     {
-    	if(i>0) {
+    	if(row>0) {
          //Test North
-            if(tile[i-1][j].getText().equals("")){
-                swapTiles(i,j, i-1,j);
+            if(tile[row-1][column].getText().equals("")) {
+                swapTiles(row,column, row-1,column);
             }
         }
         
-        if(i<3) {
+        if(row<3) {
              //Test South
-            if(tile[i+1][j].getText().equals("")){
-            	swapTiles(i,j, i+1,j);
+            if(tile[row+1][column].getText().equals("")) {
+            	swapTiles(row,column, row+1,column);
                             
             }
         }
         
-        if(j>0){
+        if(column>0) {
             //Test West
-            if(tile[i][j-1].getText().equals("")){
-                swapTiles(i,j, i,j-1);
+            if(tile[row][column-1].getText().equals("")) {
+                swapTiles(row,column, row,column-1);
             }
          }
 
-        if(j<3){
+        if(column<3){
             //Test East
-            if(tile[i][j+1].getText().equals("")){
-                swapTiles(i,j, i,j+1);
+            if(tile[row][column+1].getText().equals("")) {
+                swapTiles(row,column, row,column+1);
             }
          }
            repaint();
 
-         if(isSolved()){
+         if(isSolved()) {
         	 	JOptionPane.showMessageDialog(FifteenPuzzle.this, "Solved!");
         	 	System.exit(0);
     	}
@@ -174,26 +172,26 @@ public class FifteenPuzzle extends JFrame implements ActionListener {
     	*	It will change the label of the blank on to the new number, and it will
     	*  make the new new button blank
     	*
-    	*@oaram 	firstRow 	the row of the tile with the number on it
-    	*@param		firstCol	the column of the tile with the number on it
-    	*@param		secondRow	the row of the blank tile
-    	*@param		secondCol	the column of the blank tile
+    	*@oaram 	numberedTileRow 	the row of the tile with the number on it
+    	*@param		numberedTileCol	the column of the tile with the number on it
+    	*@param		blankTileRow	the row of the blank tile
+    	*@param		blankTileCol	the column of the blank tile
     	*/ 
-     private void swapTiles(int firstRow, int firstCol, int secondRow, int secondCol){
-        tile[secondRow][secondCol].setText(tile[firstRow][firstCol].getText());
-        tile[firstRow][firstCol].setText("");
+     private void swapTiles(int numberedTileRow, int numberedTileCol, int blankTileRow, int blankTileCol) {
+        tile[blankTileRow][blankTileCol].setText(tile[numberedTileRow][numberedTileCol].getText());
+        tile[numberedTileRow][numberedTileCol].setText("");
      }
      /**
      	* This method will check whether the puzzle has been solved.
      	* 
      	*@return 	boolean	true if the puzzle has been solved.
      	*/
-    private boolean isSolved(){
+    private boolean isSolved() {
         int arrayPlace = 0;
-        for(int i=0; i<4; i++){
-            for(int j=0; j<4; j++){
+        for(int i=0; i<4; i++) {
+            for(int j=0; j<4; j++) {
                 String text = tile[i][j].getText();
-                if (! text.equals(answerArray[arrayPlace]) ){
+                if (! text.equals(answerArray[arrayPlace]) ) {
                     return false;
                 }
                 arrayPlace++;
@@ -223,50 +221,59 @@ public class FifteenPuzzle extends JFrame implements ActionListener {
      *  This method does the actual process of the shuffle through taking the blank tile,
      *  and changing it with an adjacent tile randomly.  
      */
-	public void blankChange (int i, int j){
+
+	public void blankChange (int row, int column){
 		// choose swap across rows or swap across columns
 		int path = (int) (2 * Math.random());
-		if (path==0) // move based on i thus vertical
-		{
-			if (i==0){
-				//can only move down
-				swapTiles(i+1, j, i, j);
+		if (path==0) {
+            moveVertically( row, column);
 			}
-			else if (i==1||i==2){
-				//can move in either direction
-				int direction = (int) (2 * Math.random());
-				if (direction==1){
-					swapTiles(i+1, j, i, j);
-				}
-                else{
-                    swapTiles(i-1, j, i, j);
-                }
-			}
-			else{
-                    swapTiles(i-1, j, i, j);
-                }
-			}
-		else //path==1 movement based on j thus horizontal
+		else
 		{ 
-			if(j==0){
-				swapTiles(1, j+1, i, j);
-			}
-			else if (j==1||j==2){
-				//can move in either direction
-				int direction = (int) (2 * Math.random());
-				if (direction==1){
-					swapTiles(i, j+1, i, j);					
-				}
-				else{
-					swapTiles(i, j-1, i, j);
-				}
-			}
-
-			else{
-					swapTiles(i, j-1, i, j);
-				}
-			}
+		  moveHorizontally(row, column);
 		}
+    }
+
+    public void moveVertically(int row, int column) {
+        if (row==0) {
+            //can only move down
+            swapTiles(row+1, column, row, column);
+        }
+        else if (row==1||row==2) {
+            //can move in either direction
+            int direction = (int) (2 * Math.random());
+            if (direction==1) {
+                swapTiles(row+1,column, row,column);
+            }
+            else {
+                swapTiles(row-1,column, row,column);
+            }
+        }
+            else {
+                swapTiles(row-1,column, row,column);
+            }
+
+    }
+
+    public void moveHorizontally(int row, int column) {
+        if(column==0) {
+            swapTiles(row,column+1, row,column);
+        }
+        else if (column==1||column==2) {
+            //can move in either direction
+            int direction = (int) (2 * Math.random());
+            if (direction==1){
+                swapTiles(row,column+1, row,column);                    
+            }
+            else{
+                swapTiles(row,column-1, row,column);
+            }
+        }
+
+        else{
+            swapTiles(row,column-1, row,column);
+        }
+    }
 
     public static void main(String[]arg){
        FifteenPuzzle f =  new FifteenPuzzle();
